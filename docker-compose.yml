@@ -153,7 +153,7 @@ services:
 
 ###### Openlitespeed with builtin acme and lsphp
     openlitespeed:
-      image:            extremeshok/openlitespeed-php:latest
+      image:            extremeshok/openlitespeed-php:php${PHP_VERSION:-74}
       env_file:
         - .env
       volumes:
