@@ -160,7 +160,9 @@ services:
         - vol-www-vhosts:/var/www/vhosts:rw
         - vol-www-conf:/etc/openlitespeed:rw
         - ./xs:/xs:rw
+        # Mount custom PHP configuration (multiple paths for compatibility)
         - ./data/etc/php/${PHP_VERSION:-74}/php.ini:/usr/local/lsws/lsphp${PHP_VERSION:-74}/etc/php/${PHP_VERSION:-74}/litespeed/php.ini:ro
+        - ./data/etc/php/${PHP_VERSION:-74}/php.ini:/usr/local/lsws/lsphp${PHP_VERSION:-74}/etc/php.ini:ro
       restart:          always
       ports:
         # httpS

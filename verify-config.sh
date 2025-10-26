@@ -129,16 +129,23 @@ if command -v docker-compose &> /dev/null; then
         # Check if PHP config is mounted inside container
         echo ""
         echo -e "${BLUE}Verifying PHP Config Inside Container:${NC}"
-        if docker-compose exec -T openlitespeed test -f "/usr/local/lsws/lsphp${PHP_VER}/etc/php/${PHP_VER}/litespeed/php.ini" 2>/dev/null; then
-            echo -e "${GREEN}✓${NC} PHP config successfully mounted inside container"
-            
-            # Show some key PHP settings
-            echo ""
-            echo -e "${BLUE}Current PHP Settings (from container):${NC}"
-            docker-compose exec -T openlitespeed php -i 2>/dev/null | grep -E "^(memory_limit|upload_max_filesize|post_max_size|max_execution_time)" | head -4 || echo -e "${YELLOW}Could not retrieve PHP settings${NC}"
+        if docker-compose exec -T openlitespeed test -f "/usr/local/lsws/lsphp${PHP_VER}/etc/php.ini" 2>/dev/null; then
+            echo -e "${GREEN}✓${NC} PHP config successfully mounted at /usr/local/lsws/lsphp${PHP_VER}/etc/php.ini"
+        elif docker-compose exec -T openlitespeed test -f "/usr/local/lsws/lsphp${PHP_VER}/etc/php/${PHP_VER}/litespeed/php.ini" 2>/dev/null; then
+            echo -e "${GREEN}✓${NC} PHP config successfully mounted at /usr/local/lsws/lsphp${PHP_VER}/etc/php/${PHP_VER}/litespeed/php.ini"
         else
             echo -e "${YELLOW}!${NC} Could not verify PHP config mount (container might need restart)"
         fi
+            
+        # Show which php.ini is being loaded
+        echo ""
+        echo -e "${BLUE}Loaded PHP Configuration File:${NC}"
+        docker-compose exec -T openlitespeed php --ini 2>/dev/null | grep -E "Loaded Configuration File" || echo -e "${YELLOW}Could not retrieve loaded php.ini${NC}"
+            
+        # Show some key PHP settings
+        echo ""
+        echo -e "${BLUE}Current PHP Settings (from container):${NC}"
+        docker-compose exec -T openlitespeed php -i 2>/dev/null | grep -E "^(memory_limit|upload_max_filesize|post_max_size|max_execution_time)" | head -4 || echo -e "${YELLOW}Could not retrieve PHP settings${NC}"
     else
         echo -e "${YELLOW}!${NC} Docker containers are not running"
         echo -e "  Run: ${YELLOW}bash xshok-admin.sh --start${NC}"

@@ -287,14 +287,21 @@ git commit -m "Increased upload limits for client needs"
 # 1. Verify PHP version matches
 cat .env | grep PHP_VERSION
 
-# 2. Check if correct php.ini is mounted
+# 2. Check which php.ini is being loaded
+docker-compose exec openlitespeed php --ini
+
+# 3. Check if correct php.ini is mounted
+docker-compose exec openlitespeed ls -la /usr/local/lsws/lsphp*/etc/php.ini
 docker-compose exec openlitespeed ls -la /usr/local/lsws/lsphp*/etc/php/*/litespeed/
 
-# 3. Restart services
+# 4. Restart services
 bash xshok-admin.sh --restart
 
-# 4. Verify settings inside container
-docker-compose exec openlitespeed php -i | grep memory_limit
+# 5. Verify settings inside container
+docker-compose exec openlitespeed php -i | grep -E "memory_limit|upload_max_filesize"
+
+# 6. Check if file is readable
+docker-compose exec openlitespeed cat /usr/local/lsws/lsphp*/etc/php.ini | head -20
 ```
 
 ### OpenLiteSpeed Config Not Applied
