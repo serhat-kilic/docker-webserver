@@ -147,6 +147,8 @@ Redis configuration is located at `data/etc/redis/redis.conf`
 
 **Important:** All configuration changes persist across container restarts and updates.
 
+**For detailed configuration management guide, troubleshooting, and best practices, see [CONFIGURATION.md](CONFIGURATION.md)**
+
 ### Recommended VM:
 2 vcpu, 4GB ram (2GB can be used), NVME storage (webservers need nvme, sata ssd is too slow and hdd is pointless)
 
