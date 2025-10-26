@@ -1,5 +1,4 @@
 ### eXtremeSHOK.com Docker Webserver
-version:                '3.1'
 ################################################################################
 # This is property of eXtremeSHOK.com
 # You are free to use, modify and distribute, however you may not remove this notice.
@@ -99,7 +98,7 @@ services:
 
 ##### PHPMYADMIN
     phpmyadmin:
-      image:            bitnami/phpmyadmin:latest
+      image:            phpmyadmin/phpmyadmin:latest
       ports:
   #      - 8082:80
        - 8443:443
@@ -153,7 +152,7 @@ services:
 
 ###### Openlitespeed with builtin acme and lsphp
     openlitespeed:
-      image:            ${OPENLITESPEED_IMAGE:-litespeedtech/openlitespeed}:${OPENLITESPEED_TAG:-latest-lsphp${PHP_VERSION:-74}}
+      image:            ${OPENLITESPEED_IMAGE:-litespeedtech/openlitespeed}:${OPENLITESPEED_TAG:-1.8.1-lsphp${PHP_VERSION:-74}}
       env_file:
         - .env
       volumes:
