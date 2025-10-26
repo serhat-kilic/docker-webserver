@@ -1,6 +1,6 @@
 # docker-webserver
 Our optimized production web-server setup based on docker
-* openlitespeed + **Multi-PHP Support (PHP 7.4, 8.0, 8.1, 8.2, 8.3)** + letsencrypt ssl + mariadb(mysql) + redis + memcached
+* openlitespeed + **Multi-PHP Support (PHP 7.4, 8.0, 8.1, 8.2, 8.3, 8.4)** + letsencrypt ssl + mariadb(mysql) + redis + memcached
 
 ## This setup is used for most of our web servers and has been used for more than 6 years.
 * We have near or perfect scores for all the major webpage and performance tests
@@ -55,17 +55,38 @@ Our optimized production web-server setup based on docker
 * restoring sql files, a temporary filtered sql file is created with the create database, alter database, drop database and use statements removed
 
 ### Multi-PHP Support:
-This setup supports multiple PHP versions. You can select your desired PHP version by:
-1. Before first installation, edit the `default.env` file and set the `PHP_VERSION` variable:
-   * `PHP_VERSION=74` for PHP 7.4 (default)
-   * `PHP_VERSION=80` for PHP 8.0
-   * `PHP_VERSION=81` for PHP 8.1
-   * `PHP_VERSION=82` for PHP 8.2
-   * `PHP_VERSION=83` for PHP 8.3
-2. Or, if already installed, edit the `.env` file and add/modify the `PHP_VERSION` variable, then restart:
-   ``` bash xshok-admin.sh --down && bash xshok-admin.sh --start ```
+This setup supports multiple PHP versions (7.4, 8.0, 8.1, 8.2, 8.3, 8.4) via the official LiteSpeed Docker images. You can select your desired PHP version by:
 
-**Note:** Changing PHP versions will affect all websites on the server. Make sure your applications are compatible with the selected PHP version.
+1. **Before first installation**, edit the `default.env` file:
+   ```bash
+   # Set your desired PHP version
+   PHP_VERSION=82  # for PHP 8.2
+   ```
+   Available versions: `74` (7.4), `80` (8.0), `81` (8.1), `82` (8.2), `83` (8.3), `84` (8.4)
+
+2. **After installation**, edit the `.env` file and modify the `PHP_VERSION` variable, then restart:
+   ```bash
+   # Stop the services
+   bash xshok-admin.sh --down
+   
+   # Edit .env and change PHP_VERSION
+   nano .env  # Change PHP_VERSION=74 to your desired version
+   
+   # Start the services
+   bash xshok-admin.sh --start
+   ```
+
+3. **Advanced**: You can also manually specify the image and tag in `.env`:
+   ```bash
+   OPENLITESPEED_IMAGE=litespeedtech/openlitespeed
+   OPENLITESPEED_TAG=1.8.4-lsphp82
+   ```
+
+**Important Notes:**
+* The setup now uses `litespeedtech/openlitespeed` (official) instead of `extremeshok/openlitespeed-php` for multi-PHP support
+* Changing PHP versions will affect all websites on the server
+* Make sure your applications are compatible with the selected PHP version before switching
+* When upgrading PHP versions, test thoroughly in a development environment first
 
 ### Recommended VM:
 2 vcpu, 4GB ram (2GB can be used), NVME storage (webservers need nvme, sata ssd is too slow and hdd is pointless)
