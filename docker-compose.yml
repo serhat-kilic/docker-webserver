@@ -152,7 +152,7 @@ services:
 
 ###### Openlitespeed with builtin acme and lsphp
     openlitespeed:
-      image:            ${OPENLITESPEED_IMAGE:-litespeedtech/openlitespeed}:${OPENLITESPEED_TAG:-1.8.4-lsphp${PHP_VERSION:-74}}
+      image:            ${OPENLITESPEED_IMAGE:-litespeedtech/openlitespeed}:${OPENLITESPEED_TAG:-1.8.1-lsphp${PHP_VERSION:-74}}
       env_file:
         - .env
       volumes:
