@@ -90,7 +90,7 @@ This setup supports multiple PHP versions (7.4, 8.0, 8.1, 8.2, 8.3, 8.4) via the
 
 **For existing users upgrading from extremeshok/openlitespeed-php:**
 * The new setup uses the official LiteSpeed image which has slightly different paths/configuration
-* To continue using the old image, add these lines to your `.env` file:
+* To continue using the old image, add these lines to your `.env` file (or `default.env` before first installation):
   ```bash
   OPENLITESPEED_IMAGE=extremeshok/openlitespeed-php
   OPENLITESPEED_TAG=latest
