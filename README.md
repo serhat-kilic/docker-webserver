@@ -88,6 +88,15 @@ This setup supports multiple PHP versions (7.4, 8.0, 8.1, 8.2, 8.3, 8.4) via the
 * Make sure your applications are compatible with the selected PHP version before switching
 * When upgrading PHP versions, test thoroughly in a development environment first
 
+**For existing users upgrading from extremeshok/openlitespeed-php:**
+* The new setup uses the official LiteSpeed image which has slightly different paths/configuration
+* To continue using the old image, add these lines to your `.env` file:
+  ```bash
+  OPENLITESPEED_IMAGE=extremeshok/openlitespeed-php
+  OPENLITESPEED_TAG=latest
+  ```
+* It's recommended to backup your data before switching between images
+
 ### Recommended VM:
 2 vcpu, 4GB ram (2GB can be used), NVME storage (webservers need nvme, sata ssd is too slow and hdd is pointless)
 
