@@ -97,6 +97,56 @@ This setup supports multiple PHP versions (7.4, 8.0, 8.1, 8.2, 8.3, 8.4) via the
   ```
 * It's recommended to backup your data before switching between images
 
+### Configuration Management:
+This setup allows you to customize PHP, LiteSpeed, MySQL, and Redis configurations locally. All configuration files persist across container restarts.
+
+#### PHP Configuration
+Each PHP version has its own customizable `php.ini` file located in `data/etc/php/[VERSION]/php.ini`:
+* `data/etc/php/74/php.ini` - PHP 7.4 configuration
+* `data/etc/php/80/php.ini` - PHP 8.0 configuration
+* `data/etc/php/81/php.ini` - PHP 8.1 configuration
+* `data/etc/php/82/php.ini` - PHP 8.2 configuration
+* `data/etc/php/83/php.ini` - PHP 8.3 configuration
+* `data/etc/php/84/php.ini` - PHP 8.4 configuration
+
+**To customize PHP settings:**
+1. Edit the appropriate `php.ini` file for your PHP version (check `PHP_VERSION` in `.env`)
+2. Modify settings like `memory_limit`, `upload_max_filesize`, `max_execution_time`, etc.
+3. Restart OpenLiteSpeed to apply changes: `bash xshok-admin.sh --restart`
+
+Common settings you might want to customize:
+```ini
+memory_limit = 256M                # Maximum memory per script
+upload_max_filesize = 64M          # Maximum upload file size
+max_execution_time = 300           # Maximum script execution time
+post_max_size = 64M                # Maximum POST data size
+```
+
+See `data/etc/php/README.md` for more details and examples.
+
+#### OpenLiteSpeed Configuration
+OpenLiteSpeed configuration files are stored in `volumes/www-conf/` (mounted from `/etc/openlitespeed/` in the container).
+
+**To customize LiteSpeed settings:**
+1. **Recommended**: Use the web admin interface at `https://your-server:7080`
+   - Set password first: `bash xshok-admin.sh --password`
+2. **Alternative**: Edit files directly in `volumes/www-conf/`
+3. Apply changes: `bash xshok-admin.sh --restart`
+
+See `data/etc/openlitespeed/README.md` for more details.
+
+#### MySQL Configuration
+MySQL configuration files are in `data/etc/mysql/conf.d/`:
+* Uncomment/comment different configurations in `docker-compose.yml` based on your RAM
+* Available configs: `my-2gb.cnf`, `my-4gb.cnf`, `my-16gb.cnf`, `my-32gb.cnf`
+
+#### Redis Configuration
+Redis configuration is located at `data/etc/redis/redis.conf`
+* Edit this file to customize Redis settings
+* Restart to apply: `bash xshok-admin.sh --restart`
+
+**Important:** All configuration changes persist across container restarts and updates.
+
 ### Recommended VM:
 2 vcpu, 4GB ram (2GB can be used), NVME storage (webservers need nvme, sata ssd is too slow and hdd is pointless)
 
