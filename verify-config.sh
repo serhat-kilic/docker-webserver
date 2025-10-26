@@ -136,12 +136,12 @@ if command -v docker-compose &> /dev/null; then
         else
             echo -e "${YELLOW}!${NC} Could not verify PHP config mount (container might need restart)"
         fi
-            
+        
         # Show which php.ini is being loaded
         echo ""
         echo -e "${BLUE}Loaded PHP Configuration File:${NC}"
         docker-compose exec -T openlitespeed php --ini 2>/dev/null | grep -E "Loaded Configuration File" || echo -e "${YELLOW}Could not retrieve loaded php.ini${NC}"
-            
+        
         # Show some key PHP settings
         echo ""
         echo -e "${BLUE}Current PHP Settings (from container):${NC}"

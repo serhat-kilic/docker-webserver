@@ -160,7 +160,8 @@ services:
         - vol-www-vhosts:/var/www/vhosts:rw
         - vol-www-conf:/etc/openlitespeed:rw
         - ./xs:/xs:rw
-        # Mount custom PHP configuration (multiple paths for compatibility)
+        # Mount custom PHP configuration to multiple paths for compatibility across different LiteSpeed images
+        # The container will use whichever path exists in the specific image version
         - ./data/etc/php/${PHP_VERSION:-74}/php.ini:/usr/local/lsws/lsphp${PHP_VERSION:-74}/etc/php/${PHP_VERSION:-74}/litespeed/php.ini:ro
         - ./data/etc/php/${PHP_VERSION:-74}/php.ini:/usr/local/lsws/lsphp${PHP_VERSION:-74}/etc/php.ini:ro
       restart:          always
