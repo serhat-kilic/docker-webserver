@@ -214,7 +214,7 @@ function xshok_website_delete () { #domain
     fst_match_line ${1} ${OLS_HTTPD_CONF}
     lst_match_line ${FIRST_LINE_NUM} ${OLS_HTTPD_CONF} '}'
     sed -i "${FIRST_LINE_NUM},${LAST_LINE_NUM}d" ${OLS_HTTPD_CONF}
-    echo "Remeber to remove the dir:  ${VHOST_DIR}/${DOMAIN}/"
+    echo "Remember to remove the dir:  ${VHOST_DIR}/${DOMAIN}/"
     xshok_restart
 }
 
@@ -583,12 +583,12 @@ function xshok_ssl_list () {
     if [ ! -d "${VOLUMES}/acme" ]; then
         echo "Creating directory: ${VOLUMES}/acme"
         mkdir -p "${VOLUMES}/acme"
-        chmod 777 "${VOLUMES}/acme"
+        chmod 755 "${VOLUMES}/acme"
     fi
     if [ ! -f "${ACME_DOMAIN_LIST}" ]; then
         echo "Initializing ${ACME_DOMAIN_LIST}"
         touch "${ACME_DOMAIN_LIST}"
-        chmod 666 "${ACME_DOMAIN_LIST}"
+        chmod 644 "${ACME_DOMAIN_LIST}"
     fi
     echo "SSL List"
     echo "---- vhost -------- subdomains ----"
@@ -601,12 +601,12 @@ function xshok_ssl_add () { #domain
     if [ ! -d "${VOLUMES}/acme" ]; then
         echo "Creating directory: ${VOLUMES}/acme"
         mkdir -p "${VOLUMES}/acme"
-        chmod 777 "${VOLUMES}/acme"
+        chmod 755 "${VOLUMES}/acme"
     fi
     if [ ! -f "${ACME_DOMAIN_LIST}" ]; then
         echo "Initializing ${ACME_DOMAIN_LIST}"
         touch "${ACME_DOMAIN_LIST}"
-        chmod 666 "${ACME_DOMAIN_LIST}"
+        chmod 644 "${ACME_DOMAIN_LIST}"
     fi
     if grep -q "^${DOMAIN}" "${ACME_DOMAIN_LIST}" ; then
         echo "Warning: SSL already exists for ${DOMAIN} www.${DOMAIN}, Check ${ACME_DOMAIN_LIST}"
@@ -629,7 +629,7 @@ function xshok_ssl_delete () {
     fi
     echo "Removing SSL ${DOMAIN} www.${DOMAIN} "
     sed -i "/${DOMAIN} .*/d" "${ACME_DOMAIN_LIST}"
-    echo "Remeber to remove the dir:  ${VHOST_DIR}/${DOMAIN}/certs"
+    echo "Remember to remove the dir:  ${VHOST_DIR}/${DOMAIN}/certs"
 }
 
 ################# SSL FUNCTIONS  :: END
