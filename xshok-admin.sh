@@ -131,11 +131,21 @@ function xshok_website_list () {
     if [ -d "${VHOST_DIR}" ] ; then
         echo "Website List"
         echo "==== vhost ============ home ============ domains ===="
-        while IFS= read -r -d '' vhost_dir; do
-            vhost="${vhost_dir##*/}"
-            short_vhost_dir="${vhost_dir/$VOLUMES\//}"
-            echo "${vhost} = ${short_vhost_dir} = $(grep "vhDomain.*${vhost}" "${OLS_HTTPD_CONF}" | sed -e  's/vhDomain//g' | xargs)"
-        done < <(find "${VHOST_DIR}" -mindepth 1 -maxdepth 1 -type d -print0)  #dirs
+        # Check if httpd_config.conf exists before trying to grep it
+        if [ -f "${OLS_HTTPD_CONF}" ]; then
+            while IFS= read -r -d '' vhost_dir; do
+                vhost="${vhost_dir##*/}"
+                short_vhost_dir="${vhost_dir/$VOLUMES\//}"
+                echo "${vhost} = ${short_vhost_dir} = $(grep "vhDomain.*${vhost}" "${OLS_HTTPD_CONF}" | sed -e  's/vhDomain//g' | xargs)"
+            done < <(find "${VHOST_DIR}" -mindepth 1 -maxdepth 1 -type d -print0)  #dirs
+        else
+            echo "Warning: ${OLS_HTTPD_CONF} does not exist yet"
+            while IFS= read -r -d '' vhost_dir; do
+                vhost="${vhost_dir##*/}"
+                short_vhost_dir="${vhost_dir/$VOLUMES\//}"
+                echo "${vhost} = ${short_vhost_dir} = (config not initialized)"
+            done < <(find "${VHOST_DIR}" -mindepth 1 -maxdepth 1 -type d -print0)  #dirs
+        fi
         echo ""
     fi
 }
@@ -143,6 +153,14 @@ function xshok_website_list () {
 ################# add a website
 function xshok_website_add () { #domain
     xshok_validate_domain "${1}"
+    # Ensure httpd_config.conf exists
+    if [ ! -f "${OLS_HTTPD_CONF}" ]; then
+        echo "ERROR: ${OLS_HTTPD_CONF} does not exist"
+        echo "Please ensure the openlitespeed container is running and initialized"
+        echo "Run: docker-compose up -d openlitespeed"
+        echo "Wait a few seconds for initialization, then try again"
+        exit 1
+    fi
     if [ "$(grep -E "member.*${DOMAIN_ESCAPED}" ${OLS_HTTPD_CONF})" != '' ]; then
         echo "Warning: ${DOMAIN} already exists, Check ${OLS_HTTPD_CONF}"
     else
@@ -183,6 +201,11 @@ function xshok_website_add () { #domain
 ################# delete an existing website
 function xshok_website_delete () { #domain
     xshok_validate_domain "${1}"
+    # Ensure httpd_config.conf exists
+    if [ ! -f "${OLS_HTTPD_CONF}" ]; then
+        echo "ERROR: ${OLS_HTTPD_CONF} does not exist"
+        exit 1
+    fi
     if [ "$(grep -E "member.*${DOMAIN_ESCAPED}" ${OLS_HTTPD_CONF})" == '' ]; then
         echo "ERROR: ${DOMAIN} does NOT exist, Check ${OLS_HTTPD_CONF}"
         exit 1
@@ -191,16 +214,19 @@ function xshok_website_delete () { #domain
     fst_match_line ${1} ${OLS_HTTPD_CONF}
     lst_match_line ${FIRST_LINE_NUM} ${OLS_HTTPD_CONF} '}'
     sed -i "${FIRST_LINE_NUM},${LAST_LINE_NUM}d" ${OLS_HTTPD_CONF}
-    echo "Remeber to remove the dir:  ${VHOST_DIR}/${DOMAIN}/"
+    echo "Remember to remove the dir:  ${VHOST_DIR}/${DOMAIN}/"
     xshok_restart
 }
 
 ################# fix permission and ownership of an existing website
 function xshok_website_permissions () { #domain
     xshok_validate_domain "${1}"
-    if [ "$(grep -E "member.*${DOMAIN_ESCAPED}" ${OLS_HTTPD_CONF})" == '' ]; then
-        echo "Error: ${DOMAIN} does not exist"
-        exit 1
+    # Check if httpd_config.conf exists for validation
+    if [ -f "${OLS_HTTPD_CONF}" ]; then
+        if [ "$(grep -E "member.*${DOMAIN_ESCAPED}" ${OLS_HTTPD_CONF})" == '' ]; then
+            echo "Error: ${DOMAIN} does not exist in configuration"
+            exit 1
+        fi
     fi
     if [ ! -d "${VHOST_DIR}/${DOMAIN}/html" ]; then
         echo "Error: ${VHOST_DIR}/${DOMAIN}/html does not exist"
@@ -553,6 +579,17 @@ function xshok_database_restore () { #database #filename
 ################# SSL FUNCTIONS  :: START
 
 function xshok_ssl_list () {
+    # Ensure acme directory and domain_list.txt exist
+    if [ ! -d "${VOLUMES}/acme" ]; then
+        echo "Creating directory: ${VOLUMES}/acme"
+        mkdir -p "${VOLUMES}/acme"
+        chmod 755 "${VOLUMES}/acme"
+    fi
+    if [ ! -f "${ACME_DOMAIN_LIST}" ]; then
+        echo "Initializing ${ACME_DOMAIN_LIST}"
+        touch "${ACME_DOMAIN_LIST}"
+        chmod 644 "${ACME_DOMAIN_LIST}"
+    fi
     echo "SSL List"
     echo "---- vhost -------- subdomains ----"
     cat "${ACME_DOMAIN_LIST}"
@@ -560,6 +597,17 @@ function xshok_ssl_list () {
 }
 function xshok_ssl_add () { #domain
     xshok_validate_domain "${1}"
+    # Ensure acme directory and domain_list.txt exist
+    if [ ! -d "${VOLUMES}/acme" ]; then
+        echo "Creating directory: ${VOLUMES}/acme"
+        mkdir -p "${VOLUMES}/acme"
+        chmod 755 "${VOLUMES}/acme"
+    fi
+    if [ ! -f "${ACME_DOMAIN_LIST}" ]; then
+        echo "Initializing ${ACME_DOMAIN_LIST}"
+        touch "${ACME_DOMAIN_LIST}"
+        chmod 644 "${ACME_DOMAIN_LIST}"
+    fi
     if grep -q "^${DOMAIN}" "${ACME_DOMAIN_LIST}" ; then
         echo "Warning: SSL already exists for ${DOMAIN} www.${DOMAIN}, Check ${ACME_DOMAIN_LIST}"
     else
@@ -570,13 +618,18 @@ function xshok_ssl_add () { #domain
 
 function xshok_ssl_delete () {
     xshok_validate_domain "${1}"
+    # Ensure domain_list.txt exists
+    if [ ! -f "${ACME_DOMAIN_LIST}" ]; then
+        echo "ERROR: ${ACME_DOMAIN_LIST} does not exist"
+        exit 1
+    fi
     if ! grep -q "^${DOMAIN}" "${ACME_DOMAIN_LIST}" ; then
         echo "ERROR: SSL for ${DOMAIN} does NOT exist, Check ${ACME_DOMAIN_LIST}"
         exit 1
     fi
     echo "Removing SSL ${DOMAIN} www.${DOMAIN} "
-    sed -i "/${DOMAIN} .*/d" /datastore/volumes/acme/domain_list.txt
-    echo "Remeber to remove the dir:  ${VHOST_DIR}/${DOMAIN}/certs"
+    sed -i "/${DOMAIN} .*/d" "${ACME_DOMAIN_LIST}"
+    echo "Remember to remove the dir:  ${VHOST_DIR}/${DOMAIN}/certs"
 }
 
 ################# SSL FUNCTIONS  :: END
